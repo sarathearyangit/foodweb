@@ -1,10 +1,10 @@
-import orderModel from "../models/ordermodel.js";
-import userModel from "../models/usermodel.js";
+import orderModel from "../models/orderModel.js";
+import userModel from "../models/userModel.js";
 
 // placing user order
 const placeOrder = async (req, res) => {
 
-    const frontend_url = "http://localhost:5173";
+    const frontend_url = process.env.FRONTEND_URL;
 
     try {
 
