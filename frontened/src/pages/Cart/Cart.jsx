@@ -93,11 +93,12 @@ const Cart = () => {
             </div>
           </div>
           <button 
-            className='bg-orange-600 rounded-xl p-2 text-white active:scale-95 w-full md:w-auto'
-            onClick={() => navigate('/placeorder')}
-            console.log("checkout clicked");
-          >
-            PROCEED TO CHECKOUT
+              className='bg-orange-600 rounded-xl p-2 text-white active:scale-95 w-full md:w-auto'
+              onClick={() => {
+                  console.log("checkout clicked");
+                  navigate('/placeorder');
+              }}>
+               PROCEED TO CHECKOUT
           </button>
         </div>
 
