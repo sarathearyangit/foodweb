@@ -38,15 +38,13 @@ const placeOrder = async (req, res) => {
 const verifyOrder = async (req, res) => {
 
     console.log("VERIFY API HIT");
-    console.log("REQUEST BODY:", req.body);
+    console.log(req.body);
 
     const { orderId, success } = req.body;
 
     try {
 
-        if (success === "true") {
-
-            console.log("BEFORE DB UPDATE");
+        if (success === true || success === "true") {
 
             const updatedOrder = await orderModel.findByIdAndUpdate(
                 orderId,
@@ -54,36 +52,38 @@ const verifyOrder = async (req, res) => {
                 { new: true }
             );
 
-            console.log("AFTER DB UPDATE");
-            console.log(updatedOrder);
+            if (!updatedOrder) {
+                return res.json({
+                    success:false,
+                    message:"Order not found"
+                });
+            }
+
+            console.log("UPDATED ORDER:", updatedOrder);
 
             return res.json({
-                success: true,
-                message: "Payment Successful"
+                success:true,
+                message:"Payment Successful"
             });
 
         } else {
 
-            console.log("PAYMENT FAILED");
-
             await orderModel.findByIdAndDelete(orderId);
 
             return res.json({
-                success: false,
-                message: "Payment Failed"
+                success:false,
+                message:"Payment Failed"
             });
         }
 
+    } catch(error){
 
-    } catch (error) {
-
-        console.log("VERIFY ERROR:", error);
+        console.log(error);
 
         return res.json({
-            success: false,
-            message: error.message
+            success:false,
+            message:error.message
         });
-
     }
 };
 
