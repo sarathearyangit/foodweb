@@ -36,59 +36,55 @@ const placeOrder = async (req, res) => {
 
 // verify order
 const verifyOrder = async (req, res) => {
-  console.log("VERIFY API HIT");
-  console.log("BODY:", req.body);
 
-  const { orderId, success } = req.body;
+    console.log("VERIFY API HIT");
+    console.log("REQUEST BODY:", req.body);
 
-  try {
-    if (!orderId || !success) {
-      return res.json({
-        success: false,
-        message: "Invalid data",
-      });
-    }
+    const { orderId, success } = req.body;
 
-    if (success === "true") {
-      console.log("Updating payment for order:", orderId);
+    try {
 
-      const updatedOrder = await orderModel.findByIdAndUpdate(
-        orderId,
-        { payment: true },
-        { new: true },
-      );
+        if (success === "true") {
 
-      console.log("UPDATED ORDER:", updatedOrder);
+            console.log("BEFORE DB UPDATE");
 
-      if (!updatedOrder) {
+            const updatedOrder = await orderModel.findByIdAndUpdate(
+                orderId,
+                { payment: true },
+                { new: true }
+            );
+
+            console.log("AFTER DB UPDATE");
+            console.log(updatedOrder);
+
+            return res.json({
+                success: true,
+                message: "Payment Successful"
+            });
+
+        } else {
+
+            console.log("PAYMENT FAILED");
+
+            await orderModel.findByIdAndDelete(orderId);
+
+            return res.json({
+                success: false,
+                message: "Payment Failed"
+            });
+        }
+
+
+    } catch (error) {
+
+        console.log("VERIFY ERROR:", error);
+
         return res.json({
-          success: false,
-          message: "Order not found",
+            success: false,
+            message: error.message
         });
-      }
 
-      return res.json({
-        success: true,
-        message: "Payment Successful",
-      });
-    } else {
-      console.log("Payment failed. Deleting order:", orderId);
-
-      await orderModel.findByIdAndDelete(orderId);
-
-      return res.json({
-        success: false,
-        message: "Payment Failed",
-      });
     }
-  } catch (error) {
-    console.log("VERIFY ERROR:", error);
-
-    return res.json({
-      success: false,
-      message: "Error verifying payment",
-    });
-  }
 };
 
 // user orders
