@@ -5,77 +5,162 @@ import { StoreContext } from '../../components/context/StoreContext'
 
 const Verify = () => {
 
-  const [searchParams] = useSearchParams()
-  const success = searchParams.get('success')
-  const orderId = searchParams.get('orderId')
+    console.log("VERIFY COMPONENT LOADED")
 
-  const navigate = useNavigate()
-  const { url } = useContext(StoreContext)
+    const [searchParams] = useSearchParams()
 
-  const [status, setStatus] = useState("verifying")
+    const success = searchParams.get('success')
+    const orderId = searchParams.get('orderId')
 
-  const verifyPay = async () => {
+    const navigate = useNavigate()
 
-    console.log("SUCCESS:", success)
-    console.log("ORDER ID:", orderId)
+    const { url } = useContext(StoreContext)
 
-    if(!success || !orderId){
-      console.log("Invalid verification data")
-      navigate("/")
-      return
+    const [status, setStatus] = useState("verifying")
+
+
+    const verifyPay = async () => {
+
+        try {
+
+            console.log("SUCCESS:", success)
+            console.log("ORDER ID:", orderId)
+            console.log("BACKEND URL:", url)
+
+
+            if (!success || !orderId) {
+
+                console.log("Invalid verification data")
+
+                setStatus("failed")
+
+                setTimeout(() => {
+                    navigate("/")
+                }, 3000)
+
+                return
+            }
+
+
+            const response = await axios.post(
+                url + "/api/order/verify",
+                {
+                    success,
+                    orderId
+                }
+            )
+
+
+            console.log("VERIFY RESPONSE:", response.data)
+
+
+            if (response.data.success) {
+
+                setStatus("success")
+
+                setTimeout(() => {
+                    navigate("/myorders")
+                }, 6000)
+
+            } 
+            else {
+
+                setStatus("failed")
+
+                setTimeout(() => {
+                    navigate("/")
+                }, 6000)
+
+            }
+
+
+        } catch (error) {
+
+            console.log(
+                "VERIFY ERROR:",
+                error.response?.data || error.message
+            )
+
+            setStatus("failed")
+
+        }
+
     }
 
-    const response = await axios.post(url + '/api/order/verify', { success, orderId })
 
-    if (response.data.success) {
-      setStatus("success")
 
-      setTimeout(() => {
-        navigate('/myorders')
-      }, 6000)
+    useEffect(() => {
 
-    } else {
-      setStatus("failed")
+        verifyPay()
 
-      setTimeout(() => {
-        navigate('/')
-      }, 6000)
-    }
-  }
+    }, [])
 
-  useEffect(() => {
-    if(success && orderId ){
-      verifyPay()
-    }
-  }, [])
 
-  return (
-    <div className="flex items-center justify-center min-h-[60vh] sm:min-h-[70vh] px-4">
-      <div className="bg-white shadow-lg rounded-2xl p-6 sm:p-8 md:p-10 text-center w-full max-w-md">
 
-        {status === "verifying" && <h1 className="text-lg sm:text-xl">Verifying Payment...</h1>}
+    return (
 
-        {status === "success" && (
-          <>
-            <h1 className="text-2xl sm:text-3xl font-bold text-green-600 mb-4">
-              Payment Successful ✅
-            </h1>
-            <p className="text-sm sm:text-base">Redirecting to your orders...</p>
-          </>
-        )}
+        <div className="min-h-screen flex justify-center items-center bg-gray-100">
 
-        {status === "failed" && (
-          <>
-            <h1 className="text-2xl sm:text-3xl font-bold text-red-600 mb-4">
-              Payment Failed ❌
-            </h1>
-            <p className="text-sm sm:text-base">Redirecting to home...</p>
-          </>
-        )}
+            <div className="bg-white rounded-lg p-8 shadow-md text-center">
 
-      </div>
-    </div>
-  )
+
+                {
+                    status === "verifying" && (
+
+                        <h1 className="text-xl font-bold">
+                            Verifying Payment...
+                        </h1>
+
+                    )
+                }
+
+
+
+                {
+                    status === "success" && (
+
+                        <>
+                            <h1 className="text-3xl font-bold text-green-600 mb-4">
+                                Payment Successful ✅
+                            </h1>
+
+                            <p>
+                                Redirecting to your orders...
+                            </p>
+
+                        </>
+
+                    )
+                }
+
+
+
+
+                {
+                    status === "failed" && (
+
+                        <>
+                            <h1 className="text-3xl font-bold text-red-600 mb-4">
+                                Payment Failed ❌
+                            </h1>
+
+                            <p>
+                                Redirecting to home...
+                            </p>
+
+                        </>
+
+                    )
+                }
+
+
+            </div>
+
+        </div>
+
+    )
+
 }
+
 
 export default Verify
